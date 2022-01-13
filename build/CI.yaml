@@ -1,0 +1,36 @@
+name: $(BuildId)
+
+pool:
+  name: "samm-pool"
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - src/Samm.Douyin.Api
+
+steps:
+  - task: Docker@2
+    displayName: Build and push Douyin API image
+    inputs:
+      Dockerfile: src/Samm.Douyin.Api/Dockerfile
+      buildContext: ./
+      tags: $(Build.BuildId)
+      containerRegistry: sammwp.azurecr.cn
+      repository: kuaishouapi
+
+  - bash: echo $(Build.BuildId) > $(Build.ArtifactStagingDirectory)/image_tag.txt
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish image tag file
+    inputs:
+      artifactName: image_tag
+      targetPath: $(Build.ArtifactStagingDirectory)/image_tag.txt
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish k8s manifests
+    inputs:
+      artifactName: k8s
+      targetPath: src/Samm.Douyin.Api/deploy

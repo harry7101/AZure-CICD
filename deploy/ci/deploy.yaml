@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuaishouapi
+spec:
+  template:
+    spec:
+      containers:
+        - name: kuaishouapi
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: CI

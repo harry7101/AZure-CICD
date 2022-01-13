@@ -1,0 +1,40 @@
+name: $(Build.BuildId)_$(Date:MMdd)$(Rev:.r)
+
+pr: none
+trigger: none
+
+pool:
+  name: samm-pool
+
+resources:
+  pipelines:
+    - pipeline: ci
+      source: "KuaiShou API - CI"
+      trigger:
+        branches:
+          include:
+            - master
+
+stages:
+  - stage:
+    jobs:
+      - template: ./_deploy.yaml
+        parameters:
+          envId: ci
+          envName: CI
+          adoEnv: "KuaiShou API - CI.kuaishouapi-ci"
+          dnsName: kuaishouapi-ci.siluzan.com
+          k8sNamespace: kuaishouapi-ci
+          serviceName: kuaishouapi-ci-svc
+          ingressName: kuaishouapi-ci-ingress
+  - stage:
+    jobs:
+      - template: ./_deploy.yaml
+        parameters:
+          envId: prod
+          envName: PROD
+          adoEnv: "KuaiShou API-PROD.kuaishouapi-prod"
+          dnsName: kuaishouapi.siluzan.com
+          k8sNamespace: kuaishouapi-prod
+          serviceName: kuaishouapi-svc
+          ingressName: kuaishouapi-ingress

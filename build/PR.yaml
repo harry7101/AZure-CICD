@@ -1,0 +1,14 @@
+name: $(BuildId)
+
+pool:
+  name: "samm-pool"
+
+trigger: none
+
+steps:
+  - task: Docker@2
+    displayName: Build Douyin API
+    inputs:
+      Dockerfile: src/Samm.Douyin.Api/Dockerfile
+      buildContext: ./
+      tags: sammwp.azurecr.cn/kuaishouapi:$(BUILD_ID)

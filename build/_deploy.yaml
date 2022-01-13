@@ -1,0 +1,45 @@
+parameters:
+  - name: envName
+    type: string
+  - name: envId
+    type: string
+  - name: adoEnv
+    type: string
+  - name: dnsName
+    type: string
+  - name: k8sNamespace
+    type: string
+  - name: serviceName
+    type: string
+  - name: ingressName
+    type: string
+jobs:
+  - deployment:
+    displayName: Deploy to ${{ parameters.envName }}
+    environment: ${{ parameters.adoEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: KubernetesManifest@0
+              displayName: Kustomize
+              name: kustomize
+              inputs:
+                action: bake
+                renderType: kustomize
+                kustomizationPath: "$(Pipeline.Workspace)/ci/k8s/${{ parameters.envId }}"
+
+            - bash: |+
+                set -ex
+                IMAGE_TAG=`cat $(Pipeline.Workspace)/ci/image_tag/image_tag.txt`
+                sed -i "s/#{IMAGE_TAG}#/${IMAGE_TAG}/g; s/#{SERVICE_NAME}#/${{ parameters.serviceName }}/g; s/#{INGRESSNAME}#/${{ parameters.ingressName }}/g; s/#{DNS_NAME}#/${{ parameters.dnsName }}/g" "${MY_MANIFESTS}"
+              displayName: Replace tokens in manifests
+              env:
+                MY_MANIFESTS: $(kustomize.manifestsBundle)
+
+            - task: KubernetesManifest@0
+              displayName: "Apply k8s manifests"
+              inputs:
+                action: deploy
+                manifests: "$(kustomize.manifestsBundle)"
+                namespace: ${{ parameters.k8sNamespace }}

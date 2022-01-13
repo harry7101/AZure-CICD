@@ -1,0 +1,7 @@
+bases:
+  - ../base
+
+namespace: kuaishouapi-ci
+
+patchesStrategicMerge:
+  - deploy.yaml

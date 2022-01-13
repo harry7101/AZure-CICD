@@ -1,0 +1,6 @@
+namespace: kuaishouapi-prod
+
+resources:
+  - deploy.yaml
+  - service.yaml
+  - ingress.yaml
